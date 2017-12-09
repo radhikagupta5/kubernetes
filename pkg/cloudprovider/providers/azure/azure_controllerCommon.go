@@ -77,6 +77,10 @@ func (c *controllerCommon) AttachDisk(isManagedDisk bool, diskName, diskURI stri
 	} else if !exists {
 		return cloudprovider.InstanceNotFound
 	}
+
+	//Set Managed Disk to false for azure stack.
+	isManagedDisk = false
+
 	disks := *vm.StorageProfile.DataDisks
 	if isManagedDisk {
 		disks = append(disks,

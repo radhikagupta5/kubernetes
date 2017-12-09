@@ -594,6 +594,8 @@ func (az *Cloud) reconcileLoadBalancer(lb network.LoadBalancer, fipConfiguration
 			return lb, false, err
 		}
 
+		podPresencePath, podPresencePort := serviceapi.GetServiceHealthCheckPathPort(service)
+
 		if serviceapi.NeedsHealthCheck(service) {
 			if port.Protocol == v1.ProtocolUDP {
 				// ERROR: this isn't supported
@@ -601,8 +603,6 @@ func (az *Cloud) reconcileLoadBalancer(lb network.LoadBalancer, fipConfiguration
 				// compatible with UDP (it uses an HTTP check)
 				return lb, false, fmt.Errorf("services requiring health checks are incompatible with UDP ports")
 			}
-
-			podPresencePath, podPresencePort := serviceapi.GetServiceHealthCheckPathPort(service)
 
 			expectedProbes = append(expectedProbes, network.Probe{
 				Name: &lbRuleName,
@@ -631,6 +631,8 @@ func (az *Cloud) reconcileLoadBalancer(lb network.LoadBalancer, fipConfiguration
 		if service.Spec.SessionAffinity == v1.ServiceAffinityClientIP {
 			loadDistribution = network.SourceIP
 		}
+
+		// Azure stack: set the BackendPort to podPresencePort and EnableFloatingIP to false
 		expectedRule := network.LoadBalancingRule{
 			Name: &lbRuleName,
 			LoadBalancingRulePropertiesFormat: &network.LoadBalancingRulePropertiesFormat{
@@ -643,8 +645,8 @@ func (az *Cloud) reconcileLoadBalancer(lb network.LoadBalancer, fipConfiguration
 				},
 				LoadDistribution: loadDistribution,
 				FrontendPort:     to.Int32Ptr(port.Port),
-				BackendPort:      to.Int32Ptr(port.Port),
-				EnableFloatingIP: to.BoolPtr(true),
+				BackendPort:      to.Int32Ptr(podPresencePort),
+				EnableFloatingIP: to.BoolPtr(false),
 			},
 		}
 
