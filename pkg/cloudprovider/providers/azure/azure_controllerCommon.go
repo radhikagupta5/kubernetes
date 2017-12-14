@@ -78,6 +78,9 @@ func (c *controllerCommon) AttachDisk(isManagedDisk bool, diskName, diskURI stri
 		return cloudprovider.InstanceNotFound
 	}
 	disks := *vm.StorageProfile.DataDisks
+
+	// TODO-AZS: Does not support managed disks.
+	isManagedDisk = false
 	if isManagedDisk {
 		disks = append(disks,
 			compute.DataDisk{

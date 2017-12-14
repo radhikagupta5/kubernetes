@@ -267,11 +267,11 @@ func NewCloud(configReader io.Reader) (cloudprovider.Interface, error) {
 	az.StorageAccountClient = storage.NewAccountsClientWithBaseURI(az.Environment.ResourceManagerEndpoint, az.SubscriptionID)
 	az.StorageAccountClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	configureUserAgent(&az.StorageAccountClient.Client)
-
+	/*
 	az.DisksClient = disk.NewDisksClientWithBaseURI(az.Environment.ResourceManagerEndpoint, az.SubscriptionID)
 	az.DisksClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	configureUserAgent(&az.DisksClient.Client)
-
+	*/
 	// Conditionally configure rate limits
 	if az.CloudProviderRateLimit {
 		// Assign rate limit defaults if no configuration was passed in
@@ -422,16 +422,16 @@ func initDiskControllers(az *Cloud) error {
 	if err != nil {
 		return fmt.Errorf("AzureDisk -  failed to init Blob Disk Controller with error (%s)", err.Error())
 	}
-
+	/* TODO-AZS Commenting to bypass deployment issues.
 	// ManagedDiskController: contains the functions needed to
 	// create/attach/detach/delete managed disks
 	managedController, err := newManagedDiskController(common)
 	if err != nil {
 		return fmt.Errorf("AzureDisk -  failed to init Managed  Disk Controller with error (%s)", err.Error())
 	}
-
+	*/
 	az.BlobDiskController = blobController
-	az.ManagedDiskController = managedController
+	// az.ManagedDiskController = managedController
 	az.controllerCommon = common
 
 	return nil

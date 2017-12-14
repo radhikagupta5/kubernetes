@@ -169,13 +169,13 @@ func getPrimaryIPConfig(nic network.Interface) (*network.InterfaceIPConfiguratio
 	if len(*nic.IPConfigurations) == 1 {
 		return &((*nic.IPConfigurations)[0]), nil
 	}
-
+	/* TODO-AZS Commenting to bypass deployment issues.
 	for _, ref := range *nic.IPConfigurations {
 		if *ref.Primary {
 			return &ref, nil
 		}
 	}
-
+	*/
 	return nil, fmt.Errorf("failed to determine the determine primary ipconfig. nicname=%q", *nic.Name)
 }
 
