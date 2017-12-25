@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha1"
+	"crypto/tls"
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
@@ -203,6 +204,9 @@ type ServicePrincipalToken struct {
 
 // NewServicePrincipalTokenWithSecret create a ServicePrincipalToken using the supplied ServicePrincipalSecret implementation.
 func NewServicePrincipalTokenWithSecret(oauthConfig OAuthConfig, id string, resource string, secret ServicePrincipalSecret, callbacks ...TokenRefreshCallback) (*ServicePrincipalToken, error) {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
 	spt := &ServicePrincipalToken{
 		oauthConfig:      oauthConfig,
 		secret:           secret,
@@ -210,7 +214,7 @@ func NewServicePrincipalTokenWithSecret(oauthConfig OAuthConfig, id string, reso
 		resource:         resource,
 		autoRefresh:      true,
 		refreshWithin:    defaultRefresh,
-		sender:           &http.Client{},
+		sender:           &http.Client{Transport: tr},
 		refreshCallbacks: callbacks,
 	}
 	return spt, nil
