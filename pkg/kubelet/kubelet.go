@@ -506,7 +506,6 @@ func NewMainKubelet(kubeCfg *componentconfig.KubeletConfiguration, kubeDeps *Kub
 		glog.Fatalf("Invalid hairpin mode: %v", err)
 	}
 	glog.Infof("Hairpin mode set to %q", hairpinMode)
-
 	// TODO(#36485) Remove this workaround once we fix the init-container issue.
 	// Touch iptables lock file, which will be shared among all processes accessing
 	// the iptables.
@@ -593,14 +592,17 @@ func NewMainKubelet(kubeCfg *componentconfig.KubeletConfiguration, kubeDeps *Kub
 				kubeCfg.RemoteRuntimeEndpoint,
 				kubeCfg.RemoteImageEndpoint)
 			glog.V(2).Infof("Starting the GRPC server for the docker CRI shim.")
+			//glog.Infof("vaibhav: we definately come until here")
 			server := dockerremote.NewDockerServer(kubeCfg.RemoteRuntimeEndpoint, ds)
 			if err := server.Start(); err != nil {
+				//glog.Infof("vaibhav: premature exit 1")
 				return nil, err
 			}
 
 			// Create dockerLegacyService when the logging driver is not supported.
 			supported, err := dockershim.IsCRISupportedLogDriver(kubeDeps.DockerClient)
 			if err != nil {
+				//glog.Infof("vaibhav: premature exit 2")
 				return nil, err
 			}
 			if !supported {
@@ -610,10 +612,12 @@ func NewMainKubelet(kubeCfg *componentconfig.KubeletConfiguration, kubeDeps *Kub
 			// No-op.
 			break
 		default:
+			//glog.Infof("vaibhav: premature exit 3")
 			return nil, fmt.Errorf("unsupported CRI runtime: %q", kubeCfg.ContainerRuntime)
 		}
 		runtimeService, imageService, err := getRuntimeAndImageServices(kubeCfg)
 		if err != nil {
+			//glog.Infof("vaibhav: premature exit 4")
 			return nil, err
 		}
 		runtime, err := kuberuntime.NewKubeGenericRuntimeManager(
@@ -634,6 +638,7 @@ func NewMainKubelet(kubeCfg *componentconfig.KubeletConfiguration, kubeDeps *Kub
 			imageService,
 		)
 		if err != nil {
+			//glog.Infof("vaibhav: premature exit 5")
 			return nil, err
 		}
 		klet.containerRuntime = runtime
@@ -666,6 +671,7 @@ func NewMainKubelet(kubeCfg *componentconfig.KubeletConfiguration, kubeDeps *Kub
 			kubeCfg.RuntimeRequestTimeout.Duration,
 		)
 		if err != nil {
+			//glog.Infof("vaibhav: premature exit 6")
 			return nil, err
 		}
 		klet.containerRuntime = runtime
@@ -678,6 +684,7 @@ func NewMainKubelet(kubeCfg *componentconfig.KubeletConfiguration, kubeDeps *Kub
 	klet.pleg = pleg.NewGenericPLEG(klet.containerRuntime, plegChannelCapacity, plegRelistPeriod, klet.podCache, clock.RealClock{})
 	klet.runtimeState = newRuntimeState(maxWaitForContainerRuntime)
 	klet.runtimeState.addHealthCheck("PLEG", klet.pleg.Healthy)
+	//glog.Infof("vaibhav: we shouldn't come this far")
 	klet.updatePodCIDR(kubeCfg.PodCIDR)
 
 	// setup containerGC

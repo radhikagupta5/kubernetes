@@ -305,6 +305,7 @@ func (kl *Kubelet) updatePodCIDR(cidr string) {
 	podCIDR := kl.runtimeState.podCIDR()
 
 	if podCIDR == cidr {
+		//glog.Infof("vaibhav: premature exit 1 : %v", cidr)
 		return
 	}
 
@@ -319,6 +320,7 @@ func (kl *Kubelet) updatePodCIDR(cidr string) {
 	// kubelet -> generic runtime -> runtime shim -> network plugin
 	// docker/rkt non-cri implementations have a passthrough UpdatePodCIDR
 	if err := kl.GetRuntime().UpdatePodCIDR(cidr); err != nil {
+		//glog.Infof("vaibhav: premature exit 2")
 		glog.Errorf("Failed to update pod CIDR: %v", err)
 		return
 	}
