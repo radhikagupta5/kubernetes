@@ -4,6 +4,7 @@ package storage
 import (
 	"bufio"
 	"bytes"
+	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
 	"encoding/xml"
@@ -227,8 +228,12 @@ func NewClient(accountName, accountKey, blobServiceBaseURL, apiVersion string, u
 		return c, fmt.Errorf("azure: malformed storage account key: %v", err)
 	}
 
+	// TODO: this is a hack. Remove SSL cert validation.
+	tr := &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
+	hclient := &http.Client{Transport: tr}
+
 	c = Client{
-		HTTPClient:       http.DefaultClient,
+		HTTPClient:       hclient,
 		accountName:      accountName,
 		accountKey:       key,
 		useHTTPS:         useHTTPS,
