@@ -586,6 +586,7 @@ func (az *Cloud) reconcileLoadBalancer(lb network.LoadBalancer, fipConfiguration
 
 	var expectedProbes []network.Probe
 	var expectedRules []network.LoadBalancingRule
+	
 	for _, port := range ports {
 		lbRuleName := getLoadBalancerRuleName(service, port)
 
@@ -594,8 +595,7 @@ func (az *Cloud) reconcileLoadBalancer(lb network.LoadBalancer, fipConfiguration
 			return lb, false, err
 		}
 
-		podPresencePath, podPresencePort := serviceapi.GetServiceHealthCheckPathPort(service)
-
+		
 		if serviceapi.NeedsHealthCheck(service) {
 			if port.Protocol == v1.ProtocolUDP {
 				// ERROR: this isn't supported
@@ -603,7 +603,7 @@ func (az *Cloud) reconcileLoadBalancer(lb network.LoadBalancer, fipConfiguration
 				// compatible with UDP (it uses an HTTP check)
 				return lb, false, fmt.Errorf("services requiring health checks are incompatible with UDP ports")
 			}
-
+			podPresencePath, podPresencePort := serviceapi.GetServiceHealthCheckPathPort(service)
 			expectedProbes = append(expectedProbes, network.Probe{
 				Name: &lbRuleName,
 				ProbePropertiesFormat: &network.ProbePropertiesFormat{
@@ -645,7 +645,7 @@ func (az *Cloud) reconcileLoadBalancer(lb network.LoadBalancer, fipConfiguration
 				},
 				LoadDistribution: loadDistribution,
 				FrontendPort:     to.Int32Ptr(port.Port),
-				BackendPort:      to.Int32Ptr(podPresencePort),
+				BackendPort:      to.Int32Ptr(port.NodePort),
 				EnableFloatingIP: to.BoolPtr(false),
 			},
 		}
